@@ -25,7 +25,7 @@ class Kompressor {
         callback = null,
         imageWidth = 193, // passport size width or null to use original image width
         imageHeight = 193, // passport size height or null to use original image height
-        returnBlob = true,
+        returnBlob = false,
         reduceQuality = false,
         validExtensionArray = ['jpg', 'jpeg', 'png']
     }) {
@@ -134,7 +134,7 @@ class Kompressor {
             // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
             var byteString = atob(dataURI.split(',')[1]);
             // separate out the mime component
-            var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+            var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
             // write the bytes of the string to an ArrayBuffer
             var ab = new ArrayBuffer(byteString.length);
             // create a view into the buffer
