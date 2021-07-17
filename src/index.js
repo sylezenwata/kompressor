@@ -95,7 +95,7 @@ class Kompressor {
                 // draw image
                 context.drawImage(image, 0, 0, contextWidth, contextHeight);
                 // render image as dataURI
-                let renderedImage = context.canvas.toDataURL(`image/${this.imageExtension}`, this.reduceQuality ? 0.1 : 0.9);
+                let renderedImage = context.canvas.toDataURL(`image/${this.imageExtension.toLowerCase() === 'jpg' ? 'jpeg' : this.imageExtension}`, this.reduceQuality ? 0.1 : 0.9);
                 // val return blob
                 if (this.returnBlob) {
                     let res = this.setResponse({data: {dataURI: renderedImage, blob: this.convertToBlob(renderedImage)}});

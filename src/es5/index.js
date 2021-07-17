@@ -144,7 +144,7 @@
  
            context.drawImage(image, 0, 0, contextWidth, contextHeight); // render image as dataURI
  
-           var renderedImage = context.canvas.toDataURL("image/".concat(_this3.imageExtension), _this3.reduceQuality ? 0.1 : 0.9); // val return blob
+           var renderedImage = context.canvas.toDataURL("image/".concat(_this3.imageExtension.toLowerCase() === 'jpg' ? 'jpeg' : _this3.imageExtension), _this3.reduceQuality ? 0.1 : 0.9); // val return blob
  
            if (_this3.returnBlob) {
              var _res = _this3.setResponse({
