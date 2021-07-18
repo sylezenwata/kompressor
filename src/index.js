@@ -23,10 +23,10 @@ class Kompressor {
     constructor({
         image,
         callback = null,
-        imageWidth = 193, // passport size width or null to use original image width
-        imageHeight = 193, // passport size height or null to use original image height
-        returnBlob = false,
-        reduceQuality = false,
+        imageWidth = null,
+        imageHeight = null,
+        returnBlob = true,
+        reduceQuality = true,
         validExtensionArray = ['jpg', 'jpeg', 'png']
     }) {
         // set props
