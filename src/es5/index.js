@@ -2,7 +2,7 @@
  * kompressor.js 1.0.2
  * MIT License
  * Copyright (c) 2021 sylvester ezenwata
- * https://github.com/sylezenwata/Set.git
+ * https://github.com/sylezenwata/kompressor.git
  */
 "use strict";
 /**
