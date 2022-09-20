@@ -1,5 +1,5 @@
 /**
- * kompressor.js 1.0.2
+ * kompressor.js 2.0.0
  * MIT License
  * Copyright (c) 2021 sylvester ezenwata
  * https://github.com/sylezenwata/kompressor.git
@@ -9,203 +9,123 @@
 
 /**
  * @name Kompressor
- * Library to compress images to desired size and quality
- * @param {object} objectInstance
  */
-class Kompressor {
+export default class Kompressor {
 	/**
-	 * constructor
-	 * @param {object} param0
-	 * @returns {object}
-	 * @required image
+	 *
+	 * @param {Number} width : ;
+	 * @param {Number} height
+	 * @param {Number} xOrigin
+	 * @param {Number} yOrigin
+	 * @param {String} smoothingQuality "low"|"medium"|"high"
+	 * @param {Number|Float} quality
 	 */
-	constructor({
-		image,
-		callback,
-		imageWidth = null,
-		imageHeight = null,
-		returnBlob = false,
-		reduceQuality = true,
-		validExtensionArray = ["jpg", "jpeg", "png"],
-	}) {
-		// set props
-		this.setProps({
-			image,
-			validExtensionArray,
-			imageWidth,
-			imageHeight,
-			reduceQuality,
-			returnBlob,
-			callback,
-		});
-		// set image extension
-		this.setExtension();
-		// validate extension
-		this.validateExtension();
-		// compress image
-		this.compressImage();
+	constructor(
+		width = null,
+		height = null,
+		xOrigin = 0,
+		yOrigin = 0,
+		smoothingQuality = "low",
+		quality = 0.2
+	) {
+		this.width = width;
+		this.height = height;
+		this.xOrigin = xOrigin;
+		this.yOrigin = yOrigin;
+		this.smoothingQuality = smoothingQuality;
+		this.quality = quality;
+		this.formatsToOverride = ["png", "jpg"];
 	}
 
-	/**
-	 * function to set inastance properties as class properties
-	 * @param {object} data
-	 */
-	setProps(data) {
-		data["response"] = null;
-		Object.keys(data).forEach((eachPropKey) => {
-			this[eachPropKey] = data[eachPropKey];
+	// function to convert to blob
+	toBlob(canvas) {
+		return new Promise((resolve) => {
+			canvas.toBlob(resolve, `image/${this.format}`, this.quality);
 		});
 	}
 
-	/**
-	 * function to set iamge extension
-	 */
-	setExtension() {
-		let indexPoint = this.image.name.lastIndexOf(".");
-		this.imageExtension = this.image.name.slice(indexPoint + 1);
-	}
+	// function to compress image
+	compress(image) {
+		return new Promise((resolve, reject) => {
+			const canvas = document.createElement("canvas");
+			const context = canvas.getContext("2d");
 
-	/**
-	 * function to validate extension
-	 * if @param validExtensionArray is passed
-	 */
-	validateExtension() {
-		this.isValidExtension = Array.isArray(this.validExtensionArray)
-			? this.validExtensionArray.filter(
-					(e) => e.toLowerCase() === this.imageExtension.toLowerCase()
-			  ).length > 0
-				? true
-				: false
-			: true;
-	}
-
-	/**
-	 * function to compress image
-	 * @returns {object}
-	 */
-	compressImage() {
-		// validate extension
-		if (!this.isValidExtension) {
-			let res = this.setResponse({
-				error: {
-					type: "extension",
-					msg: `"${
-						this.imageExtension
-					}" file extension type is neither "${this.validExtensionArray.join(
-						" or "
-					)}"`,
-				},
-			});
-			return this.callback(res);
-		}
-		// process image
-		let reader = new FileReader();
-		reader.readAsDataURL(this.image);
-		reader.onload = (e) => {
-			let image = new Image();
-			image.src = e.target.result;
-			image.onload = () => {
-				// define context width and height
-				let contextWidth = this.imageWidth
-					? this.imageWidth
-					: image.naturalWidth;
-				let contextHeight = this.imageHeight
-					? this.imageHeight
-					: image.naturalHeight;
-				// create canvas and props
-				let canvas = document.createElement("canvas");
-				canvas.width = contextWidth;
-				canvas.height = contextHeight;
-				// define canvas context
-				let context = canvas.getContext("2d");
-				context.imageSmoothingEnabled = true;
-				// draw image
-				context.drawImage(image, 0, 0, contextWidth, contextHeight);
-				// render image as dataURI
-				let renderedImage = context.canvas.toDataURL(
-					`image/${
-						this.imageExtension.toLowerCase() === "jpg"
-							? "jpeg"
-							: this.imageExtension
-					}`,
-					this.reduceQuality ? 0.1 : 0.9
-				);
-				// val return blob
-				if (this.returnBlob) {
-					let res = this.setResponse({
-						data: {
-							dataURI: renderedImage,
-							blob: this.convertToBlob(renderedImage),
-						},
-					});
-					return this.callback(res);
-				}
-				let res = this.setResponse({ data: { dataURI: renderedImage } });
-				return this.callback(res);
-			};
-			image.onerror = (err) => {
-				// TODO: change res err
-				let res = this.setResponse({
-					error: {
-						type: "internal",
-						msg: err,
-					},
-				});
-				return this.callback(res);
-			};
-		};
-		reader.onerror = (err) => {
-			// TODO: change res err
-			let res = this.setResponse({
-				error: {
-					type: "internal",
-					msg: err,
-				},
-			});
-			return this.callback(res);
-		};
-	}
-
-	/**
-	 * function to convert comnpressed image to blob
-	 * @param {string} dataURI
-	 * @returns blob
-	 */
-	convertToBlob(dataURI) {
-		try {
-			// convert base64 to raw binary data held in a string
-			// doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
-			const byteString = atob(dataURI.split(",")[1]);
-			// separate out the mime component
-			const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
-			// write the bytes of the string to an ArrayBuffer
-			let ab = new ArrayBuffer(byteString.length);
-			// create a view into the buffer
-			var ia = new Uint8Array(ab);
-			// set the bytes of the buffer to the correct values
-			for (let i = 0; i < byteString.length; i++) {
-				ia[i] = byteString.charCodeAt(i);
+			if (!context) {
+				reject(new Error("Canvas context is not availbale"));
 			}
-			// write the ArrayBuffer to a blob, and you're done
-			return new Blob([ab], { type: mimeString });
-		} catch (error) {
-			// log error
-			console.log(error);
-			return null;
-		}
+
+			const contextWidth = this.width || image.naturalWidth;
+			const contextHeight = this.height || image.naturalHeight;
+
+			canvas.width = contextWidth;
+			canvas.height = contextHeight;
+
+			context.imageSmoothingsmoothingQuality = this.smoothingQuality;
+			context.save();
+			context.drawImage(
+				image,
+				this.xOrigin,
+				this.yOrigin,
+				contextWidth,
+				contextHeight
+			);
+			context.restore();
+
+			this.toBlob(canvas)
+				.then((blob) => {
+					const url = URL.createObjectURL(blob);
+					resolve({ url, blob });
+				})
+				.catch((e) => {
+					console.log(e);
+					reject(new Error("Blob conversion failed"));
+				});
+		});
+	}
+
+	// funtion to set image format
+	setFormat(format) {
+		format = format?.toString().toLowerCase();
+		this.format =
+			this.formatsToOverride.some((e) => e === format) || !format
+				? "jpeg"
+				: format;
 	}
 
 	/**
-	 * function to define response
-	 * @param {object} param0 receives any of error & data
-	 * @returns
+	 * function to read file and process compression
+	 * @param {File} file
+	 * @returns {Promise}
+	 * A successful compression will retun an object containing
+	 * - url: for displaying the image
+	 * - blob
+	 * Otherwise, an error object is returned
 	 */
-	setResponse({ data = null, error = null }) {
-		return {
-			error,
-			data,
-		};
+	process(file) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.addEventListener("load", (e) => {
+				this.setFormat(e.target.result.split(";")[0]?.split("/")[1]);
+				const img = new Image();
+				img.src = e.target.result;
+				img.addEventListener("load", () => {
+					this.compress(img)
+						.then((data) => resolve(data))
+						.catch((error) => reject(error));
+				});
+			});
+			reader.readAsDataURL(file);
+		});
+	}
+
+	/**
+	 * function to size in bytes to a readable format
+	 * @param {Number} size
+	 * @returns {String}
+	 */
+	readableSize(size) {
+		return size / 1024 > 1024
+			? ~~((10 * size) / 1024 / 1024) / 10 + "MB"
+			: ~~(size / 1024) + "KB";
 	}
 }
-
-export default Kompressor;
