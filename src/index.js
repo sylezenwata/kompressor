@@ -20,14 +20,14 @@ export default class Kompressor {
 	 * @param {String} smoothingQuality "low"|"medium"|"high"
 	 * @param {Number|Float} quality
 	 */
-	constructor(
+	constructor({
 		width = null,
 		height = null,
 		xOrigin = 0,
 		yOrigin = 0,
 		smoothingQuality = "low",
 		quality = 0.2
-	) {
+	}) {
 		this.width = width;
 		this.height = height;
 		this.xOrigin = xOrigin;

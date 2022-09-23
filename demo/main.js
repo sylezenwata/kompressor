@@ -5,7 +5,7 @@ const imageDisplay = $("img");
 
 $("input[type=file]").addEventListener("change", (e) => {
 	if (e.target.files?.length > 0) {
-		const compressor = new Kompressor();
+		const compressor = new Kompressor({});	
 		compressor
 			.process(e.target.files[0])
 			.then((_data) => {
