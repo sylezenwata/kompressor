@@ -60,7 +60,7 @@ export default class Kompressor {
 			canvas.width = contextWidth;
 			canvas.height = contextHeight;
 
-			context.imageSmoothingsmoothingQuality = this.smoothingQuality;
+			context.imageSmoothingQuality = this.smoothingQuality;
 			context.save();
 			context.drawImage(
 				image,
